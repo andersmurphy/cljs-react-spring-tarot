@@ -1,0 +1,8 @@
+;; shadow-cljs configuration
+{:deps     {:aliases [:dev]}
+ :dev-http {8080 "public"}
+ :nrepl false
+ :builds
+ {:app
+  {:target :browser
+   :modules {:main {:init-fn cljs-react-spring-tarot.app/init}}}}}
