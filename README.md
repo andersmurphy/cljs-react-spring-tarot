@@ -44,6 +44,14 @@ Production build from the shadow repl:
 
 `(shadow/release :app)`
 
+Copy files to `/docs`:
+
+```
+cp public/styles.css docs/styles.css
+cp public/index.html docs/index.html
+cp public/js/main.js docs/js/main.js
+```
+
 Push changes and the project will deploy automatically to:
 
 https://andersmurphy.github.io/cljs-react-spring-tarot/
