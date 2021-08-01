@@ -1,7 +1,7 @@
 (ns cljs-react-spring-tarot.app
   (:require [helix.core :refer [defnc $]]
             [react-dom :as rdom]
-            [helix.hooks :as hks]
+            [helix.hooks :refer [use-state]]
             ["@react-spring/web" :as spr]
             [react-use-gesture :as gest]))
 
@@ -22,7 +22,8 @@
   (str "url("url")"))
 
 (defnc app []
-  (let [[gone set-gone!] (hks/use-state #{})
+  (let [[{:keys [gone cards]} set-state!] (use-state {:gone #{}
+                                                      :cards (shuffle cards)})
         [props {:keys [start!]}]
         (use-springs
          (count cards)
@@ -56,11 +57,11 @@
                             :tension (if down
                                        800
                                        (if (gone i) 200 500))}})))
-             (set-gone! gone)
+             (set-state! #(assoc % :gone gone))
              (when (and (not down) (= (count gone) (count cards)))
                (js/setTimeout
                 (fn []
-                  (set-gone! #{})
+                  (set-state! #(assoc % :gone #{} :cards (shuffle cards)))
                   (start!
                    (fn [i]
                      {:x 0
