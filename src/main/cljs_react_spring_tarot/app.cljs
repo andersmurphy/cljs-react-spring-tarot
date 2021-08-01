@@ -39,7 +39,7 @@
          (fn [{[index] :args
                [mx]    :movement
                [xDir]  :direction
-               :keys [active velocity] :as m}]
+               :keys [active velocity]}]
            (let [trigger (> velocity 0.2)
                  gone (if (and (not active) trigger) (conj gone index) gone)]
              (.start
