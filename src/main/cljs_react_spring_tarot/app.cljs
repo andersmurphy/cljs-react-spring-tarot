@@ -16,7 +16,12 @@
    (gest/useDrag (comp f #(js->clj % :keywordize-keys true)) config)))
 
 (def cards
-  ["https://upload.wikimedia.org/wikipedia/en/f/f5/RWS_Tarot_08_Strength.jpg" "https://upload.wikimedia.org/wikipedia/en/5/53/RWS_Tarot_16_Tower.jpg" "https://upload.wikimedia.org/wikipedia/en/9/9b/RWS_Tarot_07_Chariot.jpg" "https://upload.wikimedia.org/wikipedia/en/d/db/RWS_Tarot_06_Lovers.jpg" "https://upload.wikimedia.org/wikipedia/en/thumb/8/88/RWS_Tarot_02_High_Priestess.jpg/690px-RWS_Tarot_02_High_Priestess.jpg" "https://upload.wikimedia.org/wikipedia/en/d/de/RWS_Tarot_01_Magician.jpg"])
+  ["https://upload.wikimedia.org/wikipedia/en/f/f5/RWS_Tarot_08_Strength.jpg"
+   "https://upload.wikimedia.org/wikipedia/en/5/53/RWS_Tarot_16_Tower.jpg"
+   "https://upload.wikimedia.org/wikipedia/en/9/9b/RWS_Tarot_07_Chariot.jpg"
+   "https://upload.wikimedia.org/wikipedia/en/d/db/RWS_Tarot_06_Lovers.jpg"
+   "https://upload.wikimedia.org/wikipedia/en/thumb/8/88/RWS_Tarot_02_High_Priestess.jpg/690px-RWS_Tarot_02_High_Priestess.jpg"
+   "https://upload.wikimedia.org/wikipedia/en/d/de/RWS_Tarot_01_Magician.jpg"])
 
 (defn url [url]
   (str "url("url")"))
@@ -38,10 +43,10 @@
         (use-drag
          (fn [{[index] :args
                [mx]    :movement
-               [xd]  :direction
-               :keys [down velocity]}]
-           (let [trigger (> velocity 0.2)
-                 dir (if (> xd 0) 1 -1)
+               [vx]    :velocities
+               :keys   [down] :as m}]
+           (let [trigger (> (js/Math.abs vx) 0.2)
+                 dir (if (> vx 0) 1 -1)
                  gone (if (and (not down) trigger) (conj gone index) gone)]
              (start!
               (fn [i]
@@ -50,7 +55,7 @@
                         (* (+ 200 (.-innerWidth js/window)) dir)
                         (if down mx 0))
                    :rotateZ (+ (/ mx 100)
-                               (if (gone i) (* dir 10 velocity) 0))
+                               (if (gone i) (* 10 vx) 0))
                    :scale (if down 1.1 1)
                    :delay nil
                    :config {:friction 50
@@ -72,8 +77,7 @@
                 600))))
          {:axis "x"})]
     (map-indexed
-     (fn [i {:keys [x y rot scale rotateZ]}]
-       (js/console.log rot)
+     (fn [i {:keys [x y scale rotateZ]}]
        ($ spr/animated.div
           {:key i
            :style
