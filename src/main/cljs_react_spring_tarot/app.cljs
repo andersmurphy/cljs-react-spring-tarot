@@ -37,14 +37,15 @@
             :y (* i -4)
             :scale 1
             :rotateZ (- (* (rand) 20) 10)
+            :rotateY 0
             :delay (* i 100)
-            :from {:x 0 :y -1000 :scale 1.5 :rot 0}}))
+            :from {:x 0 :y -1000 :scale 1.5}}))
         bind
         (use-drag
          (fn [{[index] :args
                [mx]    :movement
                [vx]    :velocities
-               :keys   [down] :as m}]
+               :keys   [down]}]
            (let [trigger (> (js/Math.abs vx) 0.2)
                  dir (if (> vx 0) 1 -1)
                  gone (if (and (not down) trigger) (conj gone index) gone)]
@@ -56,6 +57,7 @@
                         (if down mx 0))
                    :rotateZ (+ (/ mx 100)
                                (if (gone i) (* 10 vx) 0))
+                   :rotateY  (if down 180 0)
                    :scale (if down 1.1 1)
                    :delay nil
                    :config {:friction 50
@@ -77,7 +79,7 @@
                 600))))
          {:axis "x"})]
     (map-indexed
-     (fn [i {:keys [x y scale rotateZ]}]
+     (fn [i {:keys [x y scale rotateZ rotateY]}]
        ($ spr/animated.div
           {:key i
            :style
@@ -85,6 +87,7 @@
           ($ spr/animated.div
              {:style
               #js {:rotateZ rotateZ
+                   :rotateY rotateY
                    :scale scale
                    :backgroundImage (url (cards i))
                    :touchAction "pan-y"}
