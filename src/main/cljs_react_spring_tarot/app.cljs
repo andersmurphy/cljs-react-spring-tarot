@@ -15,7 +15,7 @@
   ([f config]
    (gest/useDrag (comp f #(js->clj % :keywordize-keys true)) config)))
 
-(def cards
+(def card-list
   ["https://upload.wikimedia.org/wikipedia/en/f/f5/RWS_Tarot_08_Strength.jpg"
    "https://upload.wikimedia.org/wikipedia/en/5/53/RWS_Tarot_16_Tower.jpg"
    "https://upload.wikimedia.org/wikipedia/en/9/9b/RWS_Tarot_07_Chariot.jpg"
@@ -27,8 +27,10 @@
   (str "url("url")"))
 
 (defnc app []
-  (let [[{:keys [gone cards]} set-state!] (use-state {:gone #{}
-                                                      :cards (shuffle cards)})
+  (let [[{:keys [flipped gone cards]} set-state!]
+        (use-state {:flipped #{}
+                    :gone #{}
+                    :cards (shuffle card-list)})
         [props {:keys [start!]}]
         (use-springs
          (count cards)
@@ -48,7 +50,9 @@
                :keys   [down]}]
            (let [trigger (> (js/Math.abs vx) 0.2)
                  dir (if (> vx 0) 1 -1)
-                 gone (if (and (not down) trigger) (conj gone index) gone)]
+                 gone (if (and (not down) trigger) (conj gone index) gone)
+                 flipped (if (and down (not (flipped index)))
+                           (conj flipped index) flipped)]
              (start!
               (fn [i]
                 (when (= i index)
@@ -57,23 +61,28 @@
                         (if down mx 0))
                    :rotateZ (+ (/ mx 100)
                                (if (gone i) (* 10 vx) 0))
-                   :rotateY  (if down 180 0)
+                   :rotateY (if (flipped i) 180 0)
                    :scale (if down 1.1 1)
                    :delay nil
                    :config {:friction 50
+                            :mass 3
                             :tension (if down
                                        800
                                        (if (gone i) 200 500))}})))
-             (set-state! #(assoc % :gone gone))
+             (set-state! #(assoc % :gone gone
+                                 :flipped flipped))
              (when (and (not down) (= (count gone) (count cards)))
                (js/setTimeout
                 (fn []
-                  (set-state! #(assoc % :gone #{} :cards (shuffle cards)))
+                  (set-state! #(assoc % :gone #{}
+                                      :flipped #{}
+                                      :cards (shuffle cards)))
                   (start!
                    (fn [i]
                      {:x 0
                       :y (* i -4)
                       :scale 1
+                      :rotateY 0
                       :rotateZ (- (* (rand) 20) 10)
                       :delay (* i 100)})))
                 600))))
@@ -89,7 +98,7 @@
               #js {:rotateZ rotateZ
                    :rotateY rotateY
                    :scale scale
-                   :backgroundImage (url (cards i))
+                   :backgroundImage (url (card-list i))
                    :touchAction "pan-y"}
               & (bind i)})))
      props)))
